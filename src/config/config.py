@@ -15,11 +15,16 @@ class Config:
 class DevConfig(Config):
     DEBUG=config('DEBUG', cast=bool)
     SQLALCHEMY_ECHO=True
-    SQLALCHEMY_DATABASE_URI="postgresql://postgres:root@localhost:5432/flask-app"
-
+    DATABASE=config('DATABASE')
+    SQLALCHEMY_DATABASE_URI=f"postgresql+psycopg2://postgres:root@localhost:5432/{DATABASE}"
 
 class TestConfig(Config):
-    pass
+    TESTING=True
+    SQLALCHEMY_ECHO=True
+    TEST_DATABASE=config('TEST_DATABASE')
+    SQLALCHEMY_DATABASE_URI= "sqlite://" 
+    DEBUG=config('DEBUG', cast=bool)
+
 
 class ProductionConfig(Config):
     pass

@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 from http import HTTPStatus
 from password_generator import PasswordGenerator
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, Conflict
 
 user_namespace=Namespace('users', description="namespace for users, admin, instructors and students")
 
@@ -31,18 +31,23 @@ class Student(Resource):
     def post(self):
         """Signup new students
         """
-        username=get_jwt_identity()
-
-        user = User.query.filter_by(username=username).first()
-
-        if user.usertype not in [UserTypes.ADMIN, UserTypes.INSTRUCTOR]:
-                raise Unauthorized("Unauthorized Request")
-        
+        loggedin_username=get_jwt_identity()
         data = request.get_json()
         password = pwo.generate()
+        new_username= data.get('username')
+
+        loggedin_user = User.query.filter_by(username=loggedin_username).first()
+
+        if loggedin_user.usertype not in [UserTypes.ADMIN, UserTypes.INSTRUCTOR]:
+            raise Unauthorized("Unauthorized Request")
+        
+        new_user = User.query.filter_by(username=new_username).first()
+
+        if new_user is not None:
+            raise Conflict(f"User with username {new_username} already exists")
 
         new_student = User(
-            username=data.get('username'),
+            username=new_username,
             passwordhash=generate_password_hash(password),
             usertype=UserTypes.STUDENT
         )
@@ -55,27 +60,29 @@ class Student(Resource):
 @user_namespace.route('/instructor')
 class Instructor(Resource):
 
-    def validate_user(self, jwt_token):
-        pass
-
     @user_namespace.expect(user_signup_request)
     @user_namespace.marshal_with(user_signup_response)
     @jwt_required()
     def post(self):
         """Signup new instructors
         """
-        username=get_jwt_identity()
-
-        user = User.query.filter_by(username=username).first()
-
-        if user.usertype is not UserTypes.ADMIN:
-                raise Unauthorized("Unauthorized Request")
-        
+        loggedin_username=get_jwt_identity()
         data = request.get_json()
         password = pwo.generate()
+        new_username= data.get('username')
+
+        loggedin_user = User.query.filter_by(username=loggedin_username).first()
+
+        if loggedin_user.usertype is not UserTypes.ADMIN:
+            raise Unauthorized("Unauthorized Request")
+        
+        new_user = User.query.filter_by(username=new_username).first()
+
+        if new_user is not None:
+            raise Conflict(f"User with username {new_username} already exists")
 
         new_user = User(
-            username=data.get('username'),
+            username=new_username,
             passwordhash=generate_password_hash(password)
         )
 

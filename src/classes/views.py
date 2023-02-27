@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash
 from password_generator import PasswordGenerator
 from http import HTTPStatus
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, Conflict
 
 from ..models.classes import Class, Modules
 from ..models.users import User, UserTypes
@@ -39,13 +39,20 @@ class Classes(Resource):
         """
         username=get_jwt_identity()
         user = User.query.filter_by(username=username).first()
+        request_data=request.get_json()
+        class_name=request_data.get('name')
+        
         if not user:
             raise Unauthorized("Unauthorized Request")
 
         if user.usertype is not UserTypes.INSTRUCTOR:
             raise Unauthorized("User without permissions!")
 
-        request_data=request.get_json()
+        existing_class = Class.query.filter_by(name=class_name).first()
+
+        if existing_class is not None:
+            raise Conflict(f"Class with name {class_name} already exists")
+
         password = pwo.generate()
 
         student_list = list(request_data.get('students'))
@@ -53,7 +60,7 @@ class Classes(Resource):
         students = User.query.filter(User.username.in_(student_list)).all()
 
         new_class = Class(
-            name=request_data.get('name'),
+            name=class_name,
             module=request_data.get('module'),
             passwordhash=generate_password_hash(password)
         )
