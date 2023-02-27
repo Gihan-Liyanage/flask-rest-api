@@ -14,7 +14,7 @@ from ..utils import db
 
 pwo = PasswordGenerator()
 
-class_namespace=Namespace('classes', description="Classes for the students")
+class_namespace=Namespace('classes', description="Classes related endpoints")
 
 create_class_model=class_namespace.model(
     "Create_Class", {
@@ -34,6 +34,12 @@ modules_model=class_namespace.model(
 class Classes(Resource):
     @class_namespace.expect(create_class_model)
     @jwt_required()
+    @class_namespace.doc(
+        description="Create new class. authorized only for instructors",
+        responses={
+            201: "Common password for created class"
+        }
+    )
     def post(self):
         """Create new classes
         """
@@ -79,6 +85,12 @@ class Classes(Resource):
 class ViewModule(Resource):
 
     @class_namespace.expect(modules_model)
+    @class_namespace.doc(
+        description="View available modules for the user",
+        responses={
+            200: "Available modules"
+        }
+    )
     @jwt_required()
     def post(self):
         """View modules
@@ -102,6 +114,12 @@ class ViewModule(Resource):
 class ExecuteModule(Resource):
 
     @class_namespace.expect(modules_model)
+    @class_namespace.doc(
+        description="Execute modules when the class is given",
+        responses={
+            200: "Hello [Available Modules]"
+        }
+    )
     @jwt_required()
     def post(self):
         """Return all the classes

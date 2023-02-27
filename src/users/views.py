@@ -7,7 +7,7 @@ from http import HTTPStatus
 from password_generator import PasswordGenerator
 from werkzeug.exceptions import Unauthorized, Conflict
 
-user_namespace=Namespace('users', description="namespace for users, admin, instructors and students")
+user_namespace=Namespace('users', description="User Endpoints")
 
 pwo = PasswordGenerator()
 
@@ -27,6 +27,12 @@ user_signup_response = user_namespace.model(
 class Student(Resource):
     @user_namespace.expect(user_signup_request)
     @user_namespace.marshal_with(user_signup_response)
+    @user_namespace.doc(
+        description="Create a new student. Authorized only for Admin and Instructor",
+        responses={
+            201: "Password for created student"
+        }
+    )
     @jwt_required()
     def post(self):
         """Signup new students
@@ -62,6 +68,12 @@ class Instructor(Resource):
 
     @user_namespace.expect(user_signup_request)
     @user_namespace.marshal_with(user_signup_response)
+    @user_namespace.doc(
+        description="Create a new instructor. Authorized only for Admin",
+        responses={
+            201: "Password for created instructor"
+        }
+    )
     @jwt_required()
     def post(self):
         """Signup new instructors

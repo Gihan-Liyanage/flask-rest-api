@@ -10,10 +10,10 @@ from werkzeug.exceptions import Forbidden
 pwo = PasswordGenerator()
 
 authentication_namespace = Namespace(
-    'auth', description="namespace for login"
+    'auth', description="Authentication Endpoints"
 )
 
-login_model = authentication_namespace.model(
+login_request = authentication_namespace.model(
     "Login", {
         'username': fields.String(required=True, description="A username"),
         'password': fields.String(required=True, description="A Password")
@@ -29,7 +29,13 @@ login_response = authentication_namespace.model(
 
 @authentication_namespace.route('/login')
 class Login(Resource):
-    @authentication_namespace.expect(login_model)
+    @authentication_namespace.expect(login_request)
+    @authentication_namespace.doc(
+        description="Login users using a username and a password",
+        responses={
+            200: "Request and access tokens for the user"
+        }
+    )
     def post(self):
         """Login user
         """
@@ -55,11 +61,14 @@ class Login(Resource):
 class Refresh(Resource):
 
     @jwt_required(refresh=True)
+    @authentication_namespace.doc(
+        description="Generate access token given the refresh token",
+        responses={
+            200: "New access token"
+        }
+    )
     def post(self):
         """Generate access token given the refresh token
-
-        Returns:
-            str: access token
         """
         username=get_jwt_identity()
 

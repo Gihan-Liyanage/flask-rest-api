@@ -18,10 +18,23 @@ def create_app(config=config_dict['dev']):
 
     db.init_app(app)
 
-    jwt=JWTManager(app)
-    migrate=Migrate(app, db)
+    jwt = JWTManager(app)
+    migrate = Migrate(app, db)
 
-    api = Api(app)
+    authorizations = {
+        "Bearer Auth": {
+            'type': "apiKey",
+            'in': 'header',
+            'name': "Authorization",
+            'description': "Add a JWT with ** Bearer &lt;JWT&gt; to authorize"
+        }
+    }
+
+    api = Api(app,
+              title="Education System",
+              description="Role based REST API for an education system",
+              authorizations=authorizations,
+              security="Bearer Auth")
 
     @api.errorhandler(NotFound)
     def not_found(error):
@@ -29,7 +42,7 @@ def create_app(config=config_dict['dev']):
             "error": "Not Found",
             "message": error.message | error
         }, 404
-    
+
     @api.errorhandler(MethodNotAllowed)
     def method_not_allowed(error):
         return {
@@ -37,8 +50,8 @@ def create_app(config=config_dict['dev']):
             "message": error.message | error
         }, 405
 
-    api.add_namespace(user_namespace, path='/user')
     api.add_namespace(authentication_namespace, path='/auth')
+    api.add_namespace(user_namespace, path='/user')
     api.add_namespace(class_namespace, path='/class')
 
     return app
