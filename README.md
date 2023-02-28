@@ -62,3 +62,6 @@ echo $FLASK_APP
 python runserver.py
 ```
 > Development server will start and Swagger documentation will be available on `http://127.0.0.1:5000/`
+
+## Database Design
+![Database Design](./images/database.png)
