@@ -26,7 +26,7 @@ create_class_model=class_namespace.model(
 
 modules_model=class_namespace.model(
     "Module", {
-     'classname': fields.List(cls_or_instance=fields.String(enum=['IMAGE_PROCESSING', 'VOICE_REC', 'FACE_DETECT']), required=True, description='List of modules'),
+     'classname': fields.String(enum=['IMAGE_PROCESSING', 'VOICE_REC', 'FACE_DETECT'], required=True, description='List of modules'),
     }
 )
 
