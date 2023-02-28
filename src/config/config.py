@@ -16,7 +16,9 @@ class DevConfig(Config):
     DEBUG=config('DEBUG', cast=bool)
     SQLALCHEMY_ECHO=True
     DATABASE=config('DATABASE')
-    SQLALCHEMY_DATABASE_URI=f"postgresql+psycopg2://postgres:root@localhost:5432/{DATABASE}"
+    DATABASE_USER=config('DATABASE_USER')
+    DATABASE_PASSWORD=config('DATABASE_PASSWORD')
+    SQLALCHEMY_DATABASE_URI=f"postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@localhost:5432/{DATABASE}"
 
 class TestConfig(Config):
     TESTING=True
