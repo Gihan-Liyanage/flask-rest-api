@@ -108,7 +108,7 @@ class ViewModule(Resource):
 
         else:
             classes = Class.query.filter(and_(Class.attending.any(id=user.id), Class.name==class_name)).all()
-            return {"module": classes[0].module}, HTTPStatus.OK
+            return {"module": classes[0].module if len(classes) !=0  else "No modules available" }, HTTPStatus.OK
 
 @class_namespace.route('/module/execute')
 class ExecuteModule(Resource):
@@ -137,4 +137,5 @@ class ExecuteModule(Resource):
 
         else:
             class_data = Class.query.filter(and_(Class.attending.any(id=user.id), Class.name==class_name)).all()
-            return {"message": f"Hello {class_data[0].module}"}, HTTPStatus.OK
+            available_modules = f" Hello {class_data[0].module}" if len(class_data) !=0 else "No modules available"
+            return {"message": available_modules}, HTTPStatus.OK
